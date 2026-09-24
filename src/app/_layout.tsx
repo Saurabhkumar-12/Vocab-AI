@@ -1,14 +1,13 @@
-import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "../../global.css";
-import { fontAssets } from "../theme/fonts";
+import { useAppFonts } from "../theme/fonts";
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts(fontAssets);
+  const [loaded, error] = useAppFonts();
 
   useEffect(() => {
     if (loaded || error) {
@@ -35,6 +34,27 @@ export default function RootLayout() {
       />
       <Stack.Screen
         name="onboarding"
+        options={{
+          headerShown: false,
+          animation: "slide_from_right",
+        }}
+      />
+      <Stack.Screen
+        name="sign-up"
+        options={{
+          headerShown: false,
+          animation: "slide_from_right",
+        }}
+      />
+      <Stack.Screen
+        name="sign-in"
+        options={{
+          headerShown: false,
+          animation: "slide_from_right",
+        }}
+      />
+      <Stack.Screen
+        name="design-system"
         options={{
           headerShown: false,
           animation: "slide_from_right",

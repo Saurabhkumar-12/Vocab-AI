@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "VocabAI",
-    "slug": "VocabAI",
+    "name": "LYRA",
+    "slug": "lyra",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "vocabai",
+    "scheme": "lyra",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon"

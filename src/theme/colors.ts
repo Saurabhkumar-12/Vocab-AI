@@ -1,18 +1,23 @@
 /**
- * Lingua Design System - Color Tokens
- * Derived from the official design system specification.
+ * lingua Design System - Color Tokens
+ * Derived from the official design system specification (01-design-system.png).
  */
 
 export const colors = {
-  // Primary Brand Colors
+  // Brand Primary Colors
   primary: {
     linguaPurple: '#6C4EF5',
     linguaDeepPurple: '#5B3BF6',
     linguaBlue: '#4D8BFF',
     linguaGreen: '#21C16B',
+    // Backward compatibility aliases
+    lyraPurple: '#6C4EF5',
+    lyraDeepPurple: '#5B3BF6',
+    lyraBlue: '#4D8BFF',
+    lyraGreen: '#21C16B',
   },
 
-  // Semantic Feedback & Status Colors
+  // Semantic Status Colors
   semantic: {
     success: '#21C16B',
     warning: '#FFC800',
@@ -32,10 +37,10 @@ export const colors = {
 } as const;
 
 /**
- * Direct shorthand access to common theme colors
+ * Direct flat access to all design system palette colors
  */
 export const palette = {
-  // Brand
+  // Brand Primary
   linguaPurple: colors.primary.linguaPurple,
   linguaDeepPurple: colors.primary.linguaDeepPurple,
   linguaBlue: colors.primary.linguaBlue,
@@ -54,6 +59,12 @@ export const palette = {
   border: colors.neutral.border,
   surface: colors.neutral.surface,
   background: colors.neutral.background,
+
+  // Backward compatibility aliases
+  lyraPurple: colors.primary.lyraPurple,
+  lyraDeepPurple: colors.primary.lyraDeepPurple,
+  lyraBlue: colors.primary.lyraBlue,
+  lyraGreen: colors.primary.lyraGreen,
 } as const;
 
 export type ThemeColors = typeof colors;

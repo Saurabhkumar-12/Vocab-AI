@@ -1,12 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import {
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  useWindowDimensions,
-  View,
+    Image,
+    Pressable,
+    StyleSheet,
+    Text,
+    useWindowDimensions,
+    View,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SpeechBubble } from '../components/speech-bubble';
@@ -18,7 +18,7 @@ export default function OnboardingScreen() {
   const { width } = useWindowDimensions();
 
   // Responsive sizing for mascot container
-  const mascotSize = Math.min(Math.max(width * 0.72, 260), 320);
+  const mascotSize = Math.min(Math.max(width * 0.9, 290), 360);
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
@@ -30,7 +30,7 @@ export default function OnboardingScreen() {
             style={styles.logoImage}
             resizeMode="contain"
           />
-          <Text style={styles.brandName}>lingua</Text>
+          <Text style={styles.brandName}>LYRA</Text>
         </View>
 
         {/* Headline & Subtitle */}
@@ -137,7 +137,7 @@ export default function OnboardingScreen() {
           ]}
         >
           <Pressable
-            onPress={() => router.push('/')}
+            onPress={() => router.push('/sign-up')}
             style={({ pressed }) => [
               styles.ctaButton,
               pressed && styles.ctaButtonPressed,
@@ -173,13 +173,13 @@ const styles = StyleSheet.create({
     paddingTop: 12,
   },
   logoImage: {
-    width: 38,
-    height: 36,
+    width: 48,
+    height: 48,
     marginRight: 8,
   },
   brandName: {
-    fontFamily: fontFamilies.bold,
-    fontSize: 28,
+    fontFamily: fontFamilies.semiBold,
+    fontSize: 27,
     color: colors.neutral.textPrimary,
     letterSpacing: -0.4,
   },
