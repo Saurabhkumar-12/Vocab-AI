@@ -1,5 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useAuth } from '@clerk/expo';
+import { useEffect } from 'react';
 import {
     Image,
     Pressable,
@@ -14,11 +16,16 @@ import { colors } from '../theme/colors';
 import { fontFamilies } from '../theme/typography';
 
 export default function OnboardingScreen() {
+  const { isLoaded, isSignedIn } = useAuth();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
 
   // Responsive sizing for mascot container
   const mascotSize = Math.min(Math.max(width * 0.9, 290), 360);
+
+  useEffect(() => {
+    if (isLoaded && isSignedIn) router.replace('/');
+  }, [isLoaded, isSignedIn]);
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>

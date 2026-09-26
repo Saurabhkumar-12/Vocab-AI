@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { useState } from 'react';
+import { router, type Href } from 'expo-router';
+import { useEffect, useState } from 'react';
 import {
     KeyboardAvoidingView,
     Platform,
@@ -17,20 +17,108 @@ import { SocialAuthButtons } from '../components/social-auth-buttons';
 import { VerificationModal } from '../components/verification-modal';
 import { colors } from '../theme/colors';
 import { fontFamilies } from '../theme/typography';
+import { useAuth, useSignUp } from '@clerk/expo';
+import { useSSO } from '@clerk/expo/experimental';
+
+function messageFor(error: unknown) {
+  const failure = error as {
+    message?: string;
+    errors?: { longMessage?: string; message?: string }[];
+  } | null;
+  return failure?.errors?.[0]?.longMessage ?? failure?.errors?.[0]?.message ?? failure?.message ?? 'Something went wrong. Please try again.';
+}
+
+async function navigateHome({ decorateUrl }: { decorateUrl: (url: string) => string }) {
+  const url = decorateUrl('/');
+  if (Platform.OS === 'web' && url.startsWith('http') && typeof window !== 'undefined') {
+    window.location.href = url;
+    return;
+  }
+  router.replace(url as Href);
+}
 
 export default function SignUpScreen() {
+  const auth = useAuth();
   const insets = useSafeAreaInsets();
-  const [email, setEmail] = useState('alex@gmail.com');
-  const [password, setPassword] = useState('password123');
+  const { signUp, errors, fetchStatus } = useSignUp();
+  const { startSSOFlow } = useSSO();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isVerificationVisible, setIsVerificationVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSocialLoading, setIsSocialLoading] = useState(false);
 
-  const handleSignUp = () => {
-    setIsVerificationVisible(true);
+  useEffect(() => {
+    if (auth.isLoaded && auth.isSignedIn) router.replace('/');
+  }, [auth.isLoaded, auth.isSignedIn]);
+
+  const handleSignUp = async () => {
+    setErrorMessage(null);
+    try {
+      const { error } = await signUp.password({ emailAddress: email.trim(), password });
+      if (error) {
+        setErrorMessage(messageFor(error));
+        return;
+      }
+      if (signUp.status === 'complete') {
+        await signUp.finalize({ navigate: navigateHome });
+        return;
+      }
+      const verification = await signUp.verifications.sendEmailCode();
+      if (verification.error) {
+        setErrorMessage(messageFor(verification.error));
+        return;
+      }
+      setIsVerificationVisible(true);
+    } catch (error) {
+      setErrorMessage(messageFor(error));
+    }
   };
 
-  const handleSocialAuth = (_provider: 'google' | 'facebook' | 'apple') => {
-    setIsVerificationVisible(true);
+  const handleVerifyCode = async (code: string) => {
+    setErrorMessage(null);
+    try {
+      const { error } = await signUp.verifications.verifyEmailCode({ code });
+      if (error) {
+        setErrorMessage(messageFor(error));
+        return;
+      }
+      if (signUp.status === 'complete') {
+        await signUp.finalize({ navigate: navigateHome });
+      }
+    } catch (error) {
+      setErrorMessage(messageFor(error));
+    }
+  };
+
+  const handleResendCode = async () => {
+    setErrorMessage(null);
+    try {
+      const { error } = await signUp.verifications.sendEmailCode();
+      if (error) setErrorMessage(messageFor(error));
+    } catch (error) {
+      setErrorMessage(messageFor(error));
+    }
+  };
+
+  const handleSocialAuth = async (provider: 'google' | 'facebook' | 'apple') => {
+    setErrorMessage(null);
+    setIsSocialLoading(true);
+    try {
+      const { createdSessionId, signUp: socialSignUp } = await startSSOFlow({
+        strategy: `oauth_${provider}`,
+      });
+      if (createdSessionId) {
+        router.replace('/');
+      } else if (socialSignUp?.status === 'missing_requirements') {
+        setErrorMessage('Your social account needs more information. Contact support or try email sign up.');
+      }
+    } catch (error) {
+      setErrorMessage(messageFor(error));
+    } finally {
+      setIsSocialLoading(false);
+    }
   };
 
   return (
@@ -82,6 +170,7 @@ export default function SignUpScreen() {
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
+              autoComplete="email"
             />
           </View>
 
@@ -98,6 +187,7 @@ export default function SignUpScreen() {
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
                 autoCorrect={false}
+                autoComplete="new-password"
               />
               <Pressable
                 onPress={() => setShowPassword((prev) => !prev)}
@@ -116,7 +206,8 @@ export default function SignUpScreen() {
 
           {/* Main Action Button: Sign Up */}
           <Pressable
-            onPress={handleSignUp}
+            onPress={() => void handleSignUp()}
+            disabled={fetchStatus === 'fetching' || isSocialLoading}
             style={({ pressed }) => [
               styles.primaryButton,
               pressed && styles.primaryButtonPressed,
@@ -124,8 +215,13 @@ export default function SignUpScreen() {
             accessibilityRole="button"
             accessibilityLabel="Sign Up"
           >
-            <Text style={styles.primaryButtonText}>Sign Up</Text>
+            <Text style={styles.primaryButtonText}>{fetchStatus === 'fetching' ? 'Please wait…' : 'Sign Up'}</Text>
           </Pressable>
+          {errorMessage || errors.fields.emailAddress?.message || errors.fields.password?.message ? (
+            <Text style={styles.errorText}>
+              {errorMessage ?? errors.fields.emailAddress?.message ?? errors.fields.password?.message}
+            </Text>
+          ) : null}
 
           {/* Divider */}
           <View style={styles.dividerRow}>
@@ -136,6 +232,8 @@ export default function SignUpScreen() {
 
           {/* Social Auth Buttons */}
           <SocialAuthButtons onPressProvider={handleSocialAuth} />
+
+          <View nativeID="clerk-captcha" />
 
           {/* Footer: Already have an account? Log in */}
           <View style={styles.footerRow}>
@@ -156,6 +254,10 @@ export default function SignUpScreen() {
         visible={isVerificationVisible}
         email={email}
         onClose={() => setIsVerificationVisible(false)}
+        onCodeComplete={handleVerifyCode}
+        onResend={handleResendCode}
+        isBusy={fetchStatus === 'fetching'}
+        error={errorMessage}
       />
     </SafeAreaView>
   );
@@ -260,6 +362,13 @@ const styles = StyleSheet.create({
     fontFamily: fontFamilies.semiBold,
     fontSize: 17,
     color: '#FFFFFF',
+  },
+  errorText: {
+    fontFamily: fontFamilies.medium,
+    fontSize: 13,
+    color: '#D92D20',
+    marginTop: 8,
+    textAlign: 'center',
   },
   dividerRow: {
     flexDirection: 'row',

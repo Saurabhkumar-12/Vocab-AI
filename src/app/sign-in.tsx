@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     KeyboardAvoidingView,
     Platform,
@@ -17,18 +17,98 @@ import { SocialAuthButtons } from '../components/social-auth-buttons';
 import { VerificationModal } from '../components/verification-modal';
 import { colors } from '../theme/colors';
 import { fontFamilies } from '../theme/typography';
+import { useAuth, useSignIn } from '@clerk/expo';
+import { useSSO } from '@clerk/expo/experimental';
+import { type Href } from 'expo-router';
+
+function messageFor(error: unknown) {
+  const failure = error as {
+    message?: string;
+    errors?: { longMessage?: string; message?: string }[];
+  } | null;
+  return failure?.errors?.[0]?.longMessage ?? failure?.errors?.[0]?.message ?? failure?.message ?? 'Something went wrong. Please try again.';
+}
+
+async function navigateHome({ decorateUrl }: { decorateUrl: (url: string) => string }) {
+  const url = decorateUrl('/');
+  if (Platform.OS === 'web' && url.startsWith('http') && typeof window !== 'undefined') {
+    window.location.href = url;
+    return;
+  }
+  router.replace(url as Href);
+}
 
 export default function SignInScreen() {
+  const auth = useAuth();
   const insets = useSafeAreaInsets();
-  const [email, setEmail] = useState('alex@gmail.com');
+  const { signIn, errors, fetchStatus } = useSignIn();
+  const { startSSOFlow } = useSSO();
+  const [email, setEmail] = useState('');
   const [isVerificationVisible, setIsVerificationVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSocialLoading, setIsSocialLoading] = useState(false);
 
-  const handleSignIn = () => {
-    setIsVerificationVisible(true);
+  useEffect(() => {
+    if (auth.isLoaded && auth.isSignedIn) router.replace('/');
+  }, [auth.isLoaded, auth.isSignedIn]);
+
+  const handleSignIn = async () => {
+    setErrorMessage(null);
+    try {
+      const { error } = await signIn.emailCode.sendCode({ emailAddress: email.trim() });
+      if (error) {
+        setErrorMessage(messageFor(error));
+        return;
+      }
+      setIsVerificationVisible(true);
+    } catch (error) {
+      setErrorMessage(messageFor(error));
+    }
   };
 
-  const handleSocialAuth = (_provider: 'google' | 'facebook' | 'apple') => {
-    setIsVerificationVisible(true);
+  const handleVerifyCode = async (code: string) => {
+    setErrorMessage(null);
+    try {
+      const { error } = await signIn.emailCode.verifyCode({ code });
+      if (error) {
+        setErrorMessage(messageFor(error));
+        return;
+      }
+      if (signIn.status === 'complete') {
+        await signIn.finalize({ navigate: navigateHome });
+      }
+    } catch (error) {
+      setErrorMessage(messageFor(error));
+    }
+  };
+
+  const handleResendCode = async () => {
+    setErrorMessage(null);
+    try {
+      const { error } = await signIn.emailCode.sendCode();
+      if (error) setErrorMessage(messageFor(error));
+    } catch (error) {
+      setErrorMessage(messageFor(error));
+    }
+  };
+
+  const handleSocialAuth = async (provider: 'google' | 'facebook' | 'apple') => {
+    setErrorMessage(null);
+    setIsSocialLoading(true);
+    try {
+      const { createdSessionId, signUp } = await startSSOFlow({
+        strategy: `oauth_${provider}`,
+      });
+      if (createdSessionId) {
+        router.replace('/');
+      } else if (signUp?.status === 'missing_requirements') {
+        setErrorMessage('Your social account needs more information. Contact support or try email sign up.');
+      }
+    } catch (error) {
+      setErrorMessage(messageFor(error));
+    } finally {
+      setIsSocialLoading(false);
+    }
   };
 
   return (
@@ -80,12 +160,14 @@ export default function SignInScreen() {
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
+              autoComplete="email"
             />
           </View>
 
           {/* Main Action Button: Sign In */}
           <Pressable
-            onPress={handleSignIn}
+            onPress={() => void handleSignIn()}
+            disabled={fetchStatus === 'fetching' || isSocialLoading}
             style={({ pressed }) => [
               styles.primaryButton,
               pressed && styles.primaryButtonPressed,
@@ -93,8 +175,11 @@ export default function SignInScreen() {
             accessibilityRole="button"
             accessibilityLabel="Sign In"
           >
-            <Text style={styles.primaryButtonText}>Sign In</Text>
+            <Text style={styles.primaryButtonText}>{fetchStatus === 'fetching' ? 'Please wait…' : 'Sign In'}</Text>
           </Pressable>
+          {errorMessage || errors.fields.identifier?.message ? (
+            <Text style={styles.errorText}>{errorMessage ?? errors.fields.identifier?.message}</Text>
+          ) : null}
 
           {/* Divider */}
           <View style={styles.dividerRow}>
@@ -125,6 +210,10 @@ export default function SignInScreen() {
         visible={isVerificationVisible}
         email={email}
         onClose={() => setIsVerificationVisible(false)}
+        onCodeComplete={handleVerifyCode}
+        onResend={handleResendCode}
+        isBusy={fetchStatus === 'fetching'}
+        error={errorMessage}
       />
     </SafeAreaView>
   );
@@ -217,6 +306,13 @@ const styles = StyleSheet.create({
     fontFamily: fontFamilies.semiBold,
     fontSize: 17,
     color: '#FFFFFF',
+  },
+  errorText: {
+    fontFamily: fontFamilies.medium,
+    fontSize: 13,
+    color: '#D92D20',
+    marginTop: 8,
+    textAlign: 'center',
   },
   dividerRow: {
     flexDirection: 'row',

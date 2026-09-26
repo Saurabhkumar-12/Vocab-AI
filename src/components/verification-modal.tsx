@@ -1,6 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import {
     Keyboard,
     KeyboardAvoidingView,
@@ -19,25 +18,28 @@ interface VerificationModalProps {
   visible: boolean;
   email: string;
   onClose: () => void;
+  onCodeComplete: (code: string) => Promise<void>;
+  onResend: () => Promise<void>;
+  isBusy: boolean;
+  error: string | null;
 }
 
 export function VerificationModal({
   visible,
   email,
   onClose,
+  onCodeComplete,
+  onResend,
+  isBusy,
+  error,
 }: VerificationModalProps) {
   const [code, setCode] = useState('');
   const inputRef = useRef<TextInput>(null);
 
-  useEffect(() => {
-    if (visible) {
-      const timer = setTimeout(() => {
-        setCode('');
-        inputRef.current?.focus();
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [visible]);
+  const handleClose = () => {
+    setCode('');
+    onClose();
+  };
 
   const handleCodeChange = (text: string) => {
     // Only accept numeric digits
@@ -45,12 +47,9 @@ export function VerificationModal({
     setCode(cleaned);
 
     // Automatically navigate to home route (/) when 6th digit is entered
-    if (cleaned.length === 6) {
+    if (cleaned.length === 6 && !isBusy) {
       Keyboard.dismiss();
-      setTimeout(() => {
-        onClose();
-        router.replace('/');
-      }, 250);
+      void onCodeComplete(cleaned);
     }
   };
 
@@ -59,19 +58,22 @@ export function VerificationModal({
       visible={visible}
       transparent={true}
       animationType="fade"
-      onRequestClose={onClose}
+      onShow={() => {
+        setTimeout(() => inputRef.current?.focus(), 45);
+      }}
+      onRequestClose={handleClose}
     >
       <KeyboardAvoidingView
         style={styles.overlay}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <Pressable style={styles.backdrop} onPress={onClose} />
+        <Pressable style={styles.backdrop} onPress={handleClose} />
 
         <View style={styles.modalCard}>
           {/* Close button */}
           <Pressable
             style={styles.closeButton}
-            onPress={onClose}
+            onPress={handleClose}
             accessibilityRole="button"
             accessibilityLabel="Close verification modal"
           >
@@ -97,6 +99,7 @@ export function VerificationModal({
           <Text style={styles.instruction}>
             Enter the code below to continue.
           </Text>
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
           {/* 6 Digit Input Boxes */}
           <Pressable
@@ -121,24 +124,35 @@ export function VerificationModal({
                 </View>
               );
             })}
+            <TextInput
+              ref={inputRef}
+              value={code}
+              onChangeText={handleCodeChange}
+              keyboardType="number-pad"
+              maxLength={6}
+              style={styles.codeInputOverlay}
+              caretHidden
+              editable={!isBusy}
+              accessibilityLabel="6-digit verification code"
+              autoComplete="one-time-code"
+              textContentType="oneTimeCode"
+              autoCorrect={false}
+              autoCapitalize="none"
+              selectionColor="transparent"
+              underlineColorAndroid="transparent"
+            />
           </Pressable>
-
-          {/* Hidden number-pad TextInput */}
-          <TextInput
-            ref={inputRef}
-            value={code}
-            onChangeText={handleCodeChange}
-            keyboardType="number-pad"
-            maxLength={6}
-            style={styles.hiddenInput}
-            caretHidden={true}
-            autoFocus={true}
-          />
 
           {/* Resend Link */}
           <View style={styles.resendContainer}>
             <Text style={styles.resendText}>{"Didn't receive the code? "}</Text>
-            <Pressable onPress={() => handleCodeChange('')}>
+            <Pressable
+              disabled={isBusy}
+              onPress={() => {
+                setCode('');
+                void onResend();
+              }}
+            >
               <Text style={styles.resendLink}>Resend code</Text>
             </Pressable>
           </View>
@@ -256,11 +270,17 @@ const styles = StyleSheet.create({
     fontSize: 22,
     color: colors.neutral.textPrimary,
   },
-  hiddenInput: {
+  codeInputOverlay: {
     position: 'absolute',
-    opacity: 0.01,
-    width: 1,
-    height: 1,
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 52,
+    zIndex: 1,
+    opacity: 0.02,
+    color: 'transparent',
+    backgroundColor: 'transparent',
+    padding: 0,
   },
   resendContainer: {
     flexDirection: 'row',
@@ -276,5 +296,13 @@ const styles = StyleSheet.create({
     fontFamily: fontFamilies.semiBold,
     fontSize: 13,
     color: colors.primary.linguaDeepPurple,
+  },
+  errorText: {
+    fontFamily: fontFamilies.medium,
+    fontSize: 13,
+    color: '#D92D20',
+    textAlign: 'center',
+    marginTop: -14,
+    marginBottom: 14,
   },
 });
