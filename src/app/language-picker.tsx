@@ -1,15 +1,21 @@
+import { useAuth } from '@clerk/expo';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SUPPORTED_LANGUAGES } from '../../data/languages';
+import type { LanguageCode } from '../../types/learning';
+import { useLanguageStore } from '../store/language-store';
 import { colors } from '../theme/colors';
 import { fontFamilies } from '../theme/typography';
 
 export default function LanguagePickerScreen() {
+  const { isSignedIn } = useAuth();
+  const selectedLanguage = useLanguageStore((state) => state.selectedLanguage);
+  const setSelectedLanguage = useLanguageStore((state) => state.setSelectedLanguage);
   const [query, setQuery] = useState('');
-  const [selectedCode, setSelectedCode] = useState('es');
+  const [selectedCode, setSelectedCode] = useState<LanguageCode>(selectedLanguage ?? 'es');
 
   const filteredLanguages = useMemo(() => {
     const value = query.trim().toLowerCase();
@@ -27,7 +33,14 @@ export default function LanguagePickerScreen() {
     });
   }, [query]);
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
+    await setSelectedLanguage(selectedCode);
+
+    if (isSignedIn) {
+      router.replace('/');
+      return;
+    }
+
     router.push('/sign-up');
   };
 
