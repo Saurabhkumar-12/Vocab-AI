@@ -1,14 +1,15 @@
-import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
+import { ClerkProvider } from "@clerk/expo";
+import { tokenCache } from "@clerk/expo/token-cache";
 import "../../global.css";
-import { fontAssets } from "../theme/fonts";
+import { useAppFonts } from "../theme/fonts";
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts(fontAssets);
+  const [loaded, error] = useAppFonts();
 
   useEffect(() => {
     if (loaded || error) {
@@ -20,7 +21,13 @@ export default function RootLayout() {
     return null;
   }
 
+  const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  if (!publishableKey) {
+    throw new Error("Add EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY to the .env file.");
+  }
+
   return (
+    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
     <Stack
       screenOptions={{
         headerShown: false,
@@ -40,6 +47,28 @@ export default function RootLayout() {
           animation: "slide_from_right",
         }}
       />
+      <Stack.Screen
+        name="sign-up"
+        options={{
+          headerShown: false,
+          animation: "slide_from_right",
+        }}
+      />
+      <Stack.Screen
+        name="sign-in"
+        options={{
+          headerShown: false,
+          animation: "slide_from_right",
+        }}
+      />
+      <Stack.Screen
+        name="design-system"
+        options={{
+          headerShown: false,
+          animation: "slide_from_right",
+        }}
+      />
     </Stack>
+    </ClerkProvider>
   );
 }

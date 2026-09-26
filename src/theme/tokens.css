@@ -1,0 +1,62 @@
+/*
+ * Lingua design tokens.
+ * Values match prompt_material/01-design-system.png and are mirrored by the
+ * typed tokens in colors.ts, spacing.ts, and typography.ts.
+ */
+@theme {
+  /* Brand palette */
+  --color-lingua-purple: #6c4ef5;
+  --color-lingua-deep-purple: #5b3bf6;
+  --color-lingua-blue: #4d8bff;
+  --color-lingua-green: #21c16b;
+
+  /* Semantic palette */
+  --color-success: #21c16b;
+  --color-warning: #ffc800;
+  --color-streak: #ff8a00;
+  --color-error: #ff4d4f;
+  --color-info: #4d8bff;
+
+  /* Neutral palette */
+  --color-text-primary: #0d132b;
+  --color-text-secondary: #6b7280;
+  --color-border: #e5e7eb;
+  --color-surface: #f6f7fb;
+  --color-background: #ffffff;
+
+  /* Compatibility aliases used by the existing screens. */
+  --color-primary: #6c4ef5;
+  --color-primary-deep: #5b3bf6;
+  --color-lyra-purple: #6c4ef5;
+  --color-lyra-deep-purple: #5b3bf6;
+  --color-lyra-blue: #4d8bff;
+  --color-lyra-green: #21c16b;
+
+  /* Poppins font files are loaded once by the root layout. */
+  --font-poppins: Poppins-Regular;
+  --font-poppins-medium: Poppins-Medium;
+  --font-poppins-semibold: Poppins-SemiBold;
+  --font-poppins-bold: Poppins-Bold;
+
+  /* 4pt spacing scale */
+  --spacing-xxs: 2px;
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-base: 16px;
+  --spacing-lg: 20px;
+  --spacing-xl: 24px;
+  --spacing-2xl: 32px;
+  --spacing-3xl: 40px;
+  --spacing-4xl: 48px;
+  --spacing-5xl: 64px;
+
+  /* Shape scale */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-3xl: 32px;
+}

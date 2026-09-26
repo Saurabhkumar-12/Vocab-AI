@@ -1,5 +1,8 @@
+import { useFonts } from 'expo-font';
+
 /**
- * Lingua Design System - Font Configuration & Assets
+ * lingua Design System - Font Configuration & Assets
+ * Primary Typeface: Poppins (Regular, Medium, SemiBold, Bold)
  */
 
 export const fontAssets = {
@@ -17,3 +20,10 @@ export const fontNames = {
 } as const;
 
 export type FontName = keyof typeof fontNames;
+
+/**
+ * Hook to load all lingua Poppins fonts
+ */
+export function useAppFonts() {
+  return useFonts(fontAssets);
+}

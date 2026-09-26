@@ -1,5 +1,5 @@
 /**
- * Lingua Design System - Spacing & Layout Tokens
+ * lingua Design System - Spacing & Layout Tokens
  */
 
 export const spacing = {
@@ -52,3 +52,7 @@ export const shadows = {
     elevation: 2,
   },
 } as const;
+
+export type SpacingToken = keyof typeof spacing;
+export type BorderRadiusToken = keyof typeof borderRadius;
+export type ShadowToken = keyof typeof shadows;

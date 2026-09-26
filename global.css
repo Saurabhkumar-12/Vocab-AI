@@ -3,131 +3,122 @@
 @import "tailwindcss/utilities.css";
 
 @import "nativewind/theme";
+@import "./src/theme/tokens.css";
 
-@theme {
-  /* Brand Primary Colors */
-  --color-primary: #6C4EF5;
-  --color-primary-deep: #5B3BF6;
-  --color-lingua-purple: #6C4EF5;
-  --color-lingua-deep-purple: #5B3BF6;
-  --color-lingua-blue: #4D8BFF;
-  --color-lingua-green: #21C16B;
-
-  /* Semantic Status Colors */
-  --color-success: #21C16B;
-  --color-warning: #FFC800;
-  --color-streak: #FF8A00;
-  --color-error: #FF4D4F;
-  --color-info: #4D8BFF;
-
-  /* Neutral UI Colors */
-  --color-text-primary: #0D132B;
-  --color-text-secondary: #6B7280;
-  --color-border: #E5E7EB;
-  --color-surface: #F6F7FB;
-  --color-background: #FFFFFF;
-
-  /* Typography Font Families */
-  --font-poppins: Poppins-Regular;
-  --font-poppins-medium: Poppins-Medium;
-  --font-poppins-semibold: Poppins-SemiBold;
-  --font-poppins-bold: Poppins-Bold;
-}
-
-/* Simple Font Weight / Family Utilities */
-.font-regular,
-.font-poppins {
-  font-family: Poppins-Regular;
-}
-
-.font-medium,
-.font-poppins-medium {
-  font-family: Poppins-Medium;
-}
-
-.font-semibold,
-.font-poppins-semibold {
-  font-family: Poppins-SemiBold;
-}
-
-.font-bold,
-.font-poppins-bold {
-  font-family: Poppins-Bold;
-}
-
-/* Simple Typography Hierarchy Utilities matching Design Spec */
-.h1,
-.text-h1 {
+/* Typography roles from the Lingua design spec. */
+@utility text-h1 {
   font-family: Poppins-Bold;
   font-size: 32px;
   line-height: 38.4px;
 }
 
-.h2,
-.text-h2 {
+@utility text-h2 {
   font-family: Poppins-SemiBold;
   font-size: 24px;
   line-height: 31.2px;
 }
 
-.h3,
-.text-h3 {
+@utility text-h3 {
   font-family: Poppins-SemiBold;
   font-size: 20px;
   line-height: 26px;
 }
 
-.h4,
-.text-h4 {
+@utility text-h4 {
   font-family: Poppins-Medium;
   font-size: 16px;
   line-height: 22.4px;
 }
 
-.body-lg,
-.body-large,
-.text-body-large {
+@utility text-body-large {
   font-family: Poppins-Regular;
   font-size: 16px;
   line-height: 25.6px;
 }
 
-.body,
-.body-md,
-.body-medium,
-.text-body-medium {
+@utility text-body-medium {
   font-family: Poppins-Regular;
   font-size: 14px;
   line-height: 22.4px;
 }
 
-.body-sm,
-.body-small,
-.text-body-small {
+@utility text-body-small {
   font-family: Poppins-Regular;
   font-size: 13px;
   line-height: 20.8px;
 }
 
-.caption,
-.text-caption {
+@utility text-caption {
   font-family: Poppins-Regular;
   font-size: 11px;
   line-height: 15.4px;
 }
 
-/* Reusable Lingua Container & Card Utilities */
-.card-surface {
-  background-color: #F6F7FB;
+/* Named font helpers stay convenient in existing and new screens. */
+@utility font-regular {
+  font-family: Poppins-Regular;
+}
+
+@utility font-medium {
+  font-family: Poppins-Medium;
+}
+
+@utility font-semibold {
+  font-family: Poppins-SemiBold;
+}
+
+@utility font-bold {
+  font-family: Poppins-Bold;
+}
+
+/* Small, reusable surface and control recipes for native components. */
+@utility card-surface {
+  background-color: var(--color-surface);
   border-width: 1px;
-  border-color: #E5E7EB;
+  border-color: var(--color-border);
   border-radius: 20px;
 }
 
-.card,
-.card-white {
-  background-color: #FFFFFF;
+@utility card-white {
+  background-color: var(--color-background);
   border-width: 1px;
-  border-color: #E5E7EB;
+  border-color: var(--color-border);
   border-radius: 20px;
+}
+
+@utility btn-primary {
+  background-color: var(--color-lingua-deep-purple);
+  border-radius: 18px;
+  height: 56px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+@utility btn-secondary {
+  background-color: var(--color-background);
+  border-width: 1.5px;
+  border-color: var(--color-lingua-deep-purple);
+  border-radius: 18px;
+  height: 52px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+@utility btn-outline {
+  background-color: var(--color-surface);
+  border-width: 1.5px;
+  border-color: var(--color-border);
+  border-radius: 16px;
+  height: 48px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding-left: 18px;
+  padding-right: 18px;
 }
