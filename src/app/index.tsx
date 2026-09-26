@@ -1,5 +1,5 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useAuth, useClerk, useUser } from '@clerk/expo';
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -51,6 +51,19 @@ export default function HomeScreen() {
         <Text style={styles.title}>Welcome, {name}!</Text>
         <Text style={styles.subtitle}>You’re signed in and ready to continue your language journey.</Text>
         {email ? <Text style={styles.email}>{email}</Text> : null}
+
+        <Pressable
+          onPress={() => router.push('/language-picker')}
+          style={({ pressed }) => [
+            styles.languageButton,
+            pressed && styles.languageButtonPressed,
+          ]}
+          accessibilityRole="button"
+          accessibilityLabel="Choose language"
+        >
+          <Ionicons name="globe-outline" size={20} color={colors.primary.linguaDeepPurple} />
+          <Text style={styles.languageButtonText}>Choose language</Text>
+        </Pressable>
       </View>
     </SafeAreaView>
   );
@@ -68,4 +81,7 @@ const styles = StyleSheet.create({
   title: { fontFamily: fontFamilies.bold, fontSize: 28, color: colors.neutral.textPrimary, textAlign: 'center' },
   subtitle: { fontFamily: fontFamilies.regular, fontSize: 16, lineHeight: 24, color: colors.neutral.textSecondary, textAlign: 'center', marginTop: 10 },
   email: { fontFamily: fontFamilies.medium, fontSize: 14, color: colors.primary.linguaDeepPurple, marginTop: 18 },
+  languageButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 22, paddingVertical: 12, paddingHorizontal: 20, borderRadius: 18, backgroundColor: '#F1EFFF' },
+  languageButtonPressed: { opacity: 0.9 },
+  languageButtonText: { fontFamily: fontFamilies.semiBold, fontSize: 15, color: colors.primary.linguaDeepPurple },
 });

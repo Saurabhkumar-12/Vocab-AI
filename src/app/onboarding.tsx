@@ -1,6 +1,6 @@
+import { useAuth } from '@clerk/expo';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useAuth } from '@clerk/expo';
 import { useEffect } from 'react';
 import {
     Image,
@@ -144,7 +144,7 @@ export default function OnboardingScreen() {
           ]}
         >
           <Pressable
-            onPress={() => router.push('/sign-up')}
+            onPress={() => router.push('/language-picker')}
             style={({ pressed }) => [
               styles.ctaButton,
               pressed && styles.ctaButtonPressed,

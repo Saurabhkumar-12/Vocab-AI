@@ -1,0 +1,81 @@
+import type { Language, LanguageCode } from '../types/learning';
+
+export const SUPPORTED_LANGUAGES: Language[] = [
+  {
+    code: 'es',
+    name: 'Spanish',
+    nativeName: 'Español',
+    region: 'Global',
+    accent: 'Neutral Latin American',
+    emoji: '🇪🇸',
+    description: 'A practical and expressive language used across Europe and Latin America.',
+    learners: 28.4,
+    isPopular: true,
+  },
+  {
+    code: 'fr',
+    name: 'French',
+    nativeName: 'Français',
+    region: 'Europe',
+    accent: 'Standard French',
+    emoji: '🇫🇷',
+    description: 'A widely spoken language with clear pronunciation and rich cultural context.',
+    learners: 19.4,
+    isPopular: true,
+  },
+  {
+    code: 'ja',
+    name: 'Japanese',
+    nativeName: '日本語',
+    region: 'Japan',
+    accent: 'Tokyo standard',
+    emoji: '🇯🇵',
+    description: 'A structured language with useful daily phrases and a very different writing system.',
+    learners: 12.7,
+    isPopular: true,
+  },
+  {
+    code: 'ko',
+    name: 'Korean',
+    nativeName: '한국어',
+    region: 'Korea',
+    accent: 'Seoul standard',
+    emoji: '🇰🇷',
+    description: 'A useful and modern language with a clear rhythm and a global learner base.',
+    learners: 9.3,
+    isPopular: true,
+  },
+  {
+    code: 'de',
+    name: 'German',
+    nativeName: 'Deutsch',
+    region: 'Europe',
+    accent: 'Standard German',
+    emoji: '🇩🇪',
+    description: 'A logical and structured language often chosen for travel and career growth.',
+    learners: 8.1,
+    isPopular: true,
+  },
+  {
+    code: 'zh',
+    name: 'Chinese',
+    nativeName: '中文',
+    region: 'China',
+    accent: 'Mandarin',
+    emoji: '🇨🇳',
+    description: 'A globally useful language with rich culture and strong travel value.',
+    learners: 7.4,
+    isPopular: true,
+  },
+];
+
+export const LANGUAGE_MAP: Record<LanguageCode, Language> = {
+  es: SUPPORTED_LANGUAGES[0],
+  fr: SUPPORTED_LANGUAGES[1],
+  ja: SUPPORTED_LANGUAGES[2],
+  ko: SUPPORTED_LANGUAGES[3],
+  de: SUPPORTED_LANGUAGES[4],
+  zh: SUPPORTED_LANGUAGES[5],
+};
+
+export const DEFAULT_LANGUAGE_CODE: LanguageCode = 'es';

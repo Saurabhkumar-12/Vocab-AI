@@ -1,8 +1,8 @@
+import { ClerkProvider } from "@clerk/expo";
+import { tokenCache } from "@clerk/expo/token-cache";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
-import { ClerkProvider } from "@clerk/expo";
-import { tokenCache } from "@clerk/expo/token-cache";
 import "../../global.css";
 import { useAppFonts } from "../theme/fonts";
 
@@ -63,6 +63,13 @@ export default function RootLayout() {
       />
       <Stack.Screen
         name="design-system"
+        options={{
+          headerShown: false,
+          animation: "slide_from_right",
+        }}
+      />
+      <Stack.Screen
+        name="language-picker"
         options={{
           headerShown: false,
           animation: "slide_from_right",
