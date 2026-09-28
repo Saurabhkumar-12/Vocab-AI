@@ -13,14 +13,15 @@ const TAB_ITEMS = [
   { name: 'chat', label: 'Chat', icon: 'chatbubble' },
   { name: 'profile', label: 'Profile', icon: 'person' },
 ] as const;
+const TAB_BAR_HORIZONTAL_PADDING = 10;
 
 function CustomTabBar({ state, navigation }: any) {
   const { width } = useWindowDimensions();
   const activeIndicatorX = useMemo(() => new Animated.Value(0), []);
-  const tabWidth = width / TAB_ITEMS.length;
+  const tabWidth = (width - TAB_BAR_HORIZONTAL_PADDING * 2) / TAB_ITEMS.length;
 
   useEffect(() => {
-    const target = state.index * tabWidth + (tabWidth - 55) / 2;
+    const target = TAB_BAR_HORIZONTAL_PADDING + state.index * tabWidth + (tabWidth - 55) / 2;
     Animated.timing(activeIndicatorX, {
       toValue: target,
       duration: 180,
@@ -118,7 +119,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderTopWidth: 0,
     borderTopColor: '#F2F2F5',
-    paddingHorizontal: 10,
+    paddingHorizontal: TAB_BAR_HORIZONTAL_PADDING,
     paddingTop: 8,
     paddingBottom: 10,
     minHeight: 78,

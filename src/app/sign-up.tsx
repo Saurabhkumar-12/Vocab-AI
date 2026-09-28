@@ -19,6 +19,7 @@ import { colors } from '../theme/colors';
 import { fontFamilies } from '../theme/typography';
 import { useAuth, useSignUp } from '@clerk/expo';
 import { useSSO } from '@clerk/expo/experimental';
+import { usePostHog } from 'posthog-react-native';
 
 function messageFor(error: unknown) {
   const failure = error as {
@@ -39,6 +40,7 @@ async function navigateHome({ decorateUrl }: { decorateUrl: (url: string) => str
 
 export default function SignUpScreen() {
   const auth = useAuth();
+  const posthog = usePostHog();
   const insets = useSafeAreaInsets();
   const { signUp, errors, fetchStatus } = useSignUp();
   const { startSSOFlow } = useSSO();
@@ -62,6 +64,7 @@ export default function SignUpScreen() {
         return;
       }
       if (signUp.status === 'complete') {
+        posthog.capture('sign_up_completed', { method: 'email_password' });
         await signUp.finalize({ navigate: navigateHome });
         return;
       }
@@ -70,6 +73,7 @@ export default function SignUpScreen() {
         setErrorMessage(messageFor(verification.error));
         return;
       }
+      posthog.capture('sign_up_verification_requested');
       setIsVerificationVisible(true);
     } catch (error) {
       setErrorMessage(messageFor(error));
@@ -85,6 +89,7 @@ export default function SignUpScreen() {
         return;
       }
       if (signUp.status === 'complete') {
+        posthog.capture('sign_up_completed', { method: 'email_password' });
         await signUp.finalize({ navigate: navigateHome });
       }
     } catch (error) {
@@ -110,6 +115,7 @@ export default function SignUpScreen() {
         strategy: `oauth_${provider}`,
       });
       if (createdSessionId) {
+        posthog.capture('social_sign_up_completed', { provider });
         router.replace('/');
       } else if (socialSignUp?.status === 'missing_requirements') {
         setErrorMessage('Your social account needs more information. Contact support or try email sign up.');

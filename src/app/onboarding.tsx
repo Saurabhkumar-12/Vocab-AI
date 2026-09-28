@@ -2,6 +2,7 @@ import { useAuth } from '@clerk/expo';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect } from 'react';
+import { usePostHog } from 'posthog-react-native';
 import {
     Image,
     Pressable,
@@ -17,6 +18,7 @@ import { fontFamilies } from '../theme/typography';
 
 export default function OnboardingScreen() {
   const { isLoaded, isSignedIn } = useAuth();
+  const posthog = usePostHog();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
 
@@ -144,7 +146,10 @@ export default function OnboardingScreen() {
           ]}
         >
           <Pressable
-            onPress={() => router.push('/language-picker')}
+            onPress={() => {
+              posthog.capture('onboarding_started');
+              router.push('/language-picker');
+            }}
             style={({ pressed }) => [
               styles.ctaButton,
               pressed && styles.ctaButtonPressed,

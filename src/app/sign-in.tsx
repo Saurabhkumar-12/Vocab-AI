@@ -20,6 +20,7 @@ import { fontFamilies } from '../theme/typography';
 import { useAuth, useSignIn } from '@clerk/expo';
 import { useSSO } from '@clerk/expo/experimental';
 import { type Href } from 'expo-router';
+import { usePostHog } from 'posthog-react-native';
 
 function messageFor(error: unknown) {
   const failure = error as {
@@ -40,6 +41,7 @@ async function navigateHome({ decorateUrl }: { decorateUrl: (url: string) => str
 
 export default function SignInScreen() {
   const auth = useAuth();
+  const posthog = usePostHog();
   const insets = useSafeAreaInsets();
   const { signIn, errors, fetchStatus } = useSignIn();
   const { startSSOFlow } = useSSO();
@@ -60,6 +62,7 @@ export default function SignInScreen() {
         setErrorMessage(messageFor(error));
         return;
       }
+      posthog.capture('sign_in_code_requested');
       setIsVerificationVisible(true);
     } catch (error) {
       setErrorMessage(messageFor(error));
@@ -75,6 +78,7 @@ export default function SignInScreen() {
         return;
       }
       if (signIn.status === 'complete') {
+        posthog.capture('sign_in_completed', { method: 'email_code' });
         await signIn.finalize({ navigate: navigateHome });
       }
     } catch (error) {
@@ -100,6 +104,7 @@ export default function SignInScreen() {
         strategy: `oauth_${provider}`,
       });
       if (createdSessionId) {
+        posthog.capture('social_sign_in_completed', { provider });
         router.replace('/');
       } else if (signUp?.status === 'missing_requirements') {
         setErrorMessage('Your social account needs more information. Contact support or try email sign up.');
