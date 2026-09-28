@@ -2,6 +2,7 @@ import { useAuth } from '@clerk/expo';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
+import { usePostHog } from 'posthog-react-native';
 import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SUPPORTED_LANGUAGES } from '../../data/languages';
@@ -12,6 +13,7 @@ import { fontFamilies } from '../theme/typography';
 
 export default function LanguagePickerScreen() {
   const { isSignedIn } = useAuth();
+  const posthog = usePostHog();
   const selectedLanguage = useLanguageStore((state) => state.selectedLanguage);
   const setSelectedLanguage = useLanguageStore((state) => state.setSelectedLanguage);
   const [query, setQuery] = useState('');
@@ -35,6 +37,9 @@ export default function LanguagePickerScreen() {
 
   const handleConfirm = async () => {
     await setSelectedLanguage(selectedCode);
+    posthog.capture('learning_language_selected', {
+      language_code: selectedCode,
+    });
 
     if (isSignedIn) {
       router.replace('/');
